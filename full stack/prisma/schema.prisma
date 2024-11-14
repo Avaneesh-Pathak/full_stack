@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model configuration {
+  id         Int     @id @default(autoincrement())
+  conf_key   String? @unique(map: "UK_configuration_conf_key") @db.VarChar(255)
+  conf_value String? @db.VarChar(255)
+  created_at String? @db.VarChar(20)
+  updated_at String? @db.VarChar(20)
+}
+
+model school {
+  id                 Int       @id @default(autoincrement())
+  name               String?   @db.VarChar(255)
+  email              String?   @unique(map: "UK_school_email") @db.VarChar(255)
+  contact_no         String?   @db.VarChar(255)
+  code               String    @unique(map: "UK_school_code") @db.VarChar(255)
+  address            String?   @db.VarChar(255)
+  city               String?   @db.VarChar(255)
+  state              String?   @db.VarChar(255)
+  zip                Int?
+  created_by_user_id Int
+  created_at         String?   @db.VarChar(20)
+  updated_at         String?   @db.VarChar(20)
+  user               user      @relation(fields: [created_by_user_id], references: [id], map: "school_user_FK")
+  student            student[]
+
+  @@index([created_by_user_id], map: "school_user_FK")
+}
+
+model student {
+  id                  Int                   @id @default(autoincrement())
+  school_id           Int
+  name                String?               @db.VarChar(255)
+  email               String?               @unique(map: "UK_student_email") @db.VarChar(255)
+  sex                 String?               @db.VarChar(255)
+  date_of_birth       String?               @db.VarChar(10)
+  code                String                @unique(map: "UK_student_code") @db.VarChar(255)
+  number              String?               @db.VarChar(255)
+  address             String?               @db.VarChar(255)
+  city                String?               @db.VarChar(255)
+  state               String?               @db.VarChar(255)
+  zip                 Int?
+  created_by_user_id  Int
+  created_at          String?               @db.VarChar(20)
+  updated_at          String?               @db.VarChar(20)
+  school              school                @relation(fields: [school_id], references: [id], map: "student_school_FK")
+  vaccination_history vaccination_history[]
+
+  @@index([school_id], map: "student_school_FK")
+}
+
+model user {
+  id         Int      @id @default(autoincrement())
+  email      String?  @unique(map: "UK_user_email") @db.VarChar(100)
+  password   String?  @db.VarChar(100)
+  name       String   @db.VarChar(100)
+  role_id    Int      @default(1)
+  created_at String?  @db.VarChar(20)
+  updated_at String?  @db.VarChar(20)
+  school     school[]
+}
+
+model vaccination_history {
+  id         Int     @id @default(autoincrement())
+  student_id Int
+  type       Int?    @default(0)
+  age        String  @db.VarChar(255)
+  vaccine    String  @db.VarChar(255)
+  due_date   String? @db.VarChar(10)
+  given_date String? @db.VarChar(10)
+  status     Int?    @default(0)
+  remarks    String? @db.Text
+  created_at String? @db.VarChar(20)
+  updated_at String? @db.VarChar(20)
+  student    student @relation(fields: [student_id], references: [id], map: "vaccination_history_student_FK")
+
+  @@index([student_id], map: "vaccination_history_student_FK")
+}
